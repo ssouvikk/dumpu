@@ -1,0 +1,17 @@
+{
+  "name": "dumpu",
+  "version": "1.0.0",
+  "description": "CLI tool to dump git-tracked codebase into a single .md or .txt file with syntax highlighting",
+  "bin": {
+    "dumpu": "./code-dump.js"
+  },
+  "type": "module",
+  "scripts": {
+    "start": "node ./code-dump.js"
+  },
+  "keywords": [
+    "codebase"
+  ],
+  "author": "Your Name",
+  "license": "MIT"
+}
