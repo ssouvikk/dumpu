@@ -27,6 +27,7 @@ const ALLOWED_EXTENSIONS_STR = [
     "kt",
     "kts",
     "scala",
+    "dart",
     "c",
     "cpp",
     "cs", // C#
@@ -138,44 +139,10 @@ function parseListToSets({ allowedExtStr, disallowedTypesStr, disallowedFilesStr
 }
 
 function stripJsTsCommentsPreservingCode(src) {
-    // Behavior: like the described awk logic
-    // - Lines that (after trim-start) start with '//' => skip
-    // - Lines that (after trim-start)
-    // const lines = src.split(/\r?\n/);
-    // const out = [];
-    // let inBlock = false;
-    // for (let raw of lines) {
-    //     const line = raw.replace(/^[ \t]+/, "");
-    //     if (inBlock) {
-    //         if (line.includes("*/")) inBlock = false;
-    //         continue;
-    //     }
-    //     if (line.startsWith("/*")) {
-    //         inBlock = true;
-    //         continue;
-    //     }
-    //     if (line.startsWith("//")) {
-    //         continue;
-    //     }
-    //     out.push(raw);
-    // }
-    // return out.join("\n");
-
-    // SAFE MODE:
-    // - Remove ONLY pure comment-only lines:
-    //   * lines starting with '//' after trim-start
-    //   * lines that are single-line block comments: '/* ... */' on the SAME line after trim-start
-    // - DO NOT touch multi-line block comments or inline comments to avoid breaking code/strings/templates.
-    const lines = src.split(/\r?\n/);
-    const keep = [];
-    for (const raw of lines) {
-        const s = raw.replace(/^[ \t]+/, ""); // trim-start
-        const isLineComment = s.startsWith("//");
-        const isSingleLineBlock = s.startsWith("/*") && s.includes("*/");
-        if (isLineComment || isSingleLineBlock) continue;
-        keep.push(raw);
-    }
-    return keep.join("\n");
+    // NOTE: User requested to NOT skip any lines.
+    // Therefore this function intentionally returns the source unchanged.
+    // Keeping a named function for backwards compatibility in the code path.
+    return src;
 }
 
 function getOutputConfig(argv) {
