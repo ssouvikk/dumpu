@@ -460,25 +460,35 @@ fs.mkdirSync(path.dirname(OUTFILE), { recursive: true });
  * (E) Instruction block
  * ===============================
  */
-const instructionBlock = String.raw`This file contains the complete codebase dump.
+const instructionBlock = String.raw`
+This file contains the complete codebase dump.
 Processing rules (selective, for all scenarios):
-1) Avoid irrelevant analysis: skip unused or unrelated parts to save tokens and time.
-2) Always identify the smallest set of files strictly required for the current question/request/task; do NOT load/analyze the full codebase.
-3) Always check from root file, do not assume any code context or file name.
-5) If both frontend and backend are provided, include ONLY the necessary portions from each side that impact the task; ignore the rest.
-6) Prefer minimal dependency paths: open just the entry points, directly related modules, and immediately required shared utilities.
-7) Use package.json only to understand dependencies/scripts/versions when needed; do not analyze it further unless needed.
-8) Allways try to follow all industry standard best practises. & Try not to refactor or reformat unless it's very important.
-8) Skip unrelated assets, tests, configs, and presentation-only pieces unless the request explicitly mentions them.
-9) File index/table-of-contents exists in this dump, use it to locate the relevant files quickly before loading any content.
-10) Exclude any analysis of irrelevant or unused parts to save tokens and keep the response focused.
-11) If there is any ambiguity, ask only one clear question; otherwise, proceed with reasonable assumptions.
-13) By default, return the solution as a unified diff (patch) including the exact file paths as in the dump, so it can be copied and applied directly with \`git apply\`. If the user explicitly requests the entire updated file content instead of a patch, then provide the full file(s) content exactly as they should appear after the changes.
-14) Performance-first: limit total input/read to 5MB at a time; process anything larger in batches.
-15) Short dependency path: open only entry points, directly related modules, and immediately required shared utilities.
-16) Size & chunking: for large files, read only the necessary line ranges/sections; chunk the file if needed.
-17) Always return answers as a unified, git-apply-able diff (unified patch). Each hunk MUST include the target file path and explicit original/new line ranges (i.e., @@ -start,count +start,count @@). Additionally, include a short metadata comment above each patch with filename and affected line numbers for human readability.
 
+- Avoid irrelevant analysis: skip unused or unrelated parts to save tokens and time.
+- Always Identify the smallest set of files strictly required for the current question/request/task; do NOT load or analyze the full codebase.
+- Always start analysis from the project root or entrypoint; do not assume context or filenames.
+
+- Prefer minimal dependency paths: open only entry points, directly related modules, and immediately required shared utilities.
+- Skip unrelated assets, large binaries, tests, and presentation-only files unless explicitly requested.
+
+
+- If both frontend and backend exist, include only the portions from each side that directly impact the task.
+
+- Performance-first: limit total input/read to 5MB at a time; process larger data in batches.
+- For large files, read only necessary line ranges/sections; chunk and stream to avoid OOM and speed up processing.
+
+
+9) Use the file index / table-of-contents inside the dump to locate relevant files before loading full contents.
+7) Follow industry-standard best practices; avoid refactoring or reformatting unless essential to the task.
+6) Use package.json only to understand dependencies, scripts, and versions when needed.
+10) If there is ambiguity, ask one clear question; otherwise proceed with reasonable assumptions and document them.
+
+
+
+18) Use repo-relative paths only in patches; diffs must use standard git prefixes (a/ and b/).
+19) Default deliverable: always return answers as a unified, git-apply-able diff. Each hunk MUST include the target file path and explicit original/new line ranges (i.e., @@ -start,count +start,count @@).
+20) Include a short metadata comment above each patch with filename, original/new line ranges, and sha(s) for human readability and traceability.
+21) Patches must include at least 3 lines of surrounding context by default
 `;
 
 // Sort for stability
