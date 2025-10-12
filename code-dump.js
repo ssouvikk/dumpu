@@ -477,6 +477,8 @@ Processing rules (selective, for all scenarios):
 14) Performance-first: limit total input/read to 5MB at a time; process anything larger in batches.
 15) Short dependency path: open only entry points, directly related modules, and immediately required shared utilities.
 16) Size & chunking: for large files, read only the necessary line ranges/sections; chunk the file if needed.
+17) Always return answers as a unified, git-apply-able diff (unified patch). Each hunk MUST include the target file path and explicit original/new line ranges (i.e., @@ -start,count +start,count @@). Additionally, include a short metadata comment above each patch with filename and affected line numbers for human readability.
+
 `;
 
 // Sort for stability
