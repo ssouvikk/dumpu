@@ -461,19 +461,18 @@ fs.mkdirSync(path.dirname(OUTFILE), { recursive: true });
  * ===============================
  */
 const instructionBlock = String.raw`This file contains the complete codebase dump.
-Processing rules (selective, stateless, for all scenarios):
+Processing rules (selective, for all scenarios):
 1) Avoid irrelevant analysis: skip unused or unrelated parts to save tokens and time.
 2) Always identify the smallest set of files strictly required for the current question/request/task; do NOT load/analyze the full codebase.
-3) If only frontend content is provided, consider only relevant client-side files; do not assume any backend context.
-4) If only backend content is provided, consider only relevant server-side files; do not assume any frontend context.
+3) Always check from root file, do not assume any code context or file name.
 5) If both frontend and backend are provided, include ONLY the necessary portions from each side that impact the task; ignore the rest.
 6) Prefer minimal dependency paths: open just the entry points, directly related modules, and immediately required shared utilities.
-7) Use package.json only to understand dependencies/scripts/versions when needed; do not analyze it further unless explicitly requested.
+7) Use package.json only to understand dependencies/scripts/versions when needed; do not analyze it further unless needed.
+8) Allways try to follow all industry standard best practises. & Try not to refactor or reformat unless it's very important.
 8) Skip unrelated assets, tests, configs, and presentation-only pieces unless the request explicitly mentions them.
 9) File index/table-of-contents exists in this dump, use it to locate the relevant files quickly before loading any content.
 10) Exclude any analysis of irrelevant or unused parts to save tokens and keep the response focused.
 11) If there is any ambiguity, ask only one clear question; otherwise, proceed with reasonable assumptions.
-12) Do not refactor or reformat unless explicitly requested.
 13) By default, return the solution as a unified diff (patch) including the exact file paths as in the dump, so it can be copied and applied directly with \`git apply\`. If the user explicitly requests the entire updated file content instead of a patch, then provide the full file(s) content exactly as they should appear after the changes.
 14) Performance-first: limit total input/read to 5MB at a time; process anything larger in batches.
 15) Short dependency path: open only entry points, directly related modules, and immediately required shared utilities.
