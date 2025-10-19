@@ -24,6 +24,14 @@ npx dumpu
 npx dumpu
 ```
 
+```bash
+npx dumpu --fileName=frontend.md
+```
+
+```bash
+npx dumpu --fileName=backend.md
+```
+
 ➡️ ডিফল্ট আউটপুট:
 - Location: `~/Downloads/completeCodebase.txt`
 - Format: `.txt`
