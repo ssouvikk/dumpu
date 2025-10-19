@@ -462,33 +462,42 @@ fs.mkdirSync(path.dirname(OUTFILE), { recursive: true });
  */
 const instructionBlock = String.raw`
 This file contains the complete codebase dump.
-Processing rules (selective, for all scenarios):
-
-- Avoid irrelevant analysis: skip unused or unrelated parts to save tokens and time.
-- Always Identify the smallest set of files strictly required for the current question/request/task; do NOT load or analyze the full codebase.
-- Always start analysis from the project root or entrypoint; do not assume context or filenames.
-
-- Prefer minimal dependency paths: open only entry points, directly related modules, and immediately required shared utilities.
-- Skip unrelated assets, large binaries, tests, and presentation-only files unless explicitly requested.
+Processing rules (Focused, selective for all scenarios):
 
 
-- If both frontend and backend exist, include only the portions from each side that directly impact the task.
+## 1. Root-First, Minimal-Scope Analysis
+- Always start from the project root or entrypoint.
+- Identify only minimal files required for the task (do NOT assume context or filenames).
+- Never load or analyze the full codebase to save tokens and time
+- Skip irrelevant parts (tests, binaries, presentation-only files, etc.) unless it is requested/required.
+- If both frontend and backend exist, include only those portions that directly affect the current task.
 
-- Performance-first: limit total input/read to 5MB at a time; process larger data in batches.
-- For large files, read only necessary line ranges/sections; chunk and stream to avoid OOM and speed up processing.
 
-
-9) Use the file index / table-of-contents inside the dump to locate relevant files before loading full contents.
-7) Follow industry-standard best practices; avoid refactoring or reformatting unless essential to the task.
-6) Use package.json only to understand dependencies, scripts, and versions when needed.
-10) If there is ambiguity, ask one clear question; otherwise proceed with reasonable assumptions and document them.
+## 2. Performance-Optimized File Handling
+- Read only necessary line ranges or sections for large files.
+- Use chunking/streaming to avoid OOM and increase speed.
+- Limit total input to 5MB at a time; process larger data in batches (if required/possible).
+- Use table of contents to locate relevant files before loading content.
 
 
 
-18) Use repo-relative paths only in patches; diffs must use standard git prefixes (a/ and b/).
-19) Default deliverable: always return answers as a unified, git-apply-able diff. Each hunk MUST include the target file path and explicit original/new line ranges (i.e., @@ -start,count +start,count @@).
-20) Include a short metadata comment above each patch with filename, original/new line ranges, and sha(s) for human readability and traceability.
-21) Patches must include at least 3 lines of surrounding context by default
+## 3. Best Practices & Ambiguity Handling
+- Follow industry-standard best practices.
+- Avoid refactoring/reformatting unless essential.
+- Use "package.json" only for dependencies/scripts/version info when needed.
+- If ambiguity exists, ask one clear question; otherwise, proceed with reasonable assumptions and document them.
+
+
+
+
+## 4. Patch & Default Output Standards
+- Use repo-relative paths in patches.
+- Diff must follow standard git format ("a/" and "b/" prefixes).
+- Each hunk must include target file path and explicit line ranges ("@@ -start,count +start,count @@").
+- Add a short metadata comment above each patch (filename, line ranges, SHA). for human readability and traceability.
+- Include at least 3 lines of context around each diff hunk by default.
+- Patches must include at least 3 lines of surrounding context by default
+
 `;
 
 // Sort for stability
