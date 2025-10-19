@@ -1,17 +1,17 @@
 {
   "name": "dumpu",
-  "version": "1.0.0",
+  "version": "0.2.0", 
   "description": "CLI tool to dump git-tracked codebase into a single .md or .txt file with syntax highlighting",
   "bin": {
     "dumpu": "./code-dump.js"
   },
+  "repository": { "type": "git", "url": "git@github.com:ssouvikk/dumpu.git" },
   "type": "module",
   "scripts": {
     "start": "node ./code-dump.js"
   },
-  "keywords": [
-    "codebase"
-  ],
-  "author": "Your Name",
+  "engines": { "node": ">=18.0.0" },
+  "keywords": ["codebase", "dump", "chatgpt", "cli", "dumpu"],
+  "author": "Souvik Mondal",
   "license": "MIT"
 }
