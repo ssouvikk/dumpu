@@ -148,39 +148,63 @@ function stripJsTsCommentsPreservingCode(src) {
 function getOutputConfig(argv) {
     // supports:
     //   --fileName=mydump
-    //   --fileName mydump.md
+    //   --fileName mydump.txt
     //   --format=md|txt (overrides extension inference)
-    let base = "completeCodebase.txt"; // default name + default format .md
-    let format = "txt"; // "md" | "txt"
+    //   --md / --txt (shortcuts)
+
+    let base = "completeCodebase.txt"; // default name + default format .txt
+    let format = "txt"; // default format
+
+    // First pass: read explicit flags
     for (let i = 2; i < argv.length; i++) {
         const a = argv[i];
+
         if (a.startsWith("--fileName=")) {
             base = a.slice("--fileName=".length).trim() || base;
-        } else if (a === "--fileName") {
+            continue;
+        }
+        if (a === "--fileName") {
             base = (argv[i + 1] || base).trim();
             i++;
-        } else if (a.startsWith("--format=")) {
+            continue;
+        }
+
+        if (a.startsWith("--format=")) {
             const f = a.slice("--format=".length).trim().toLowerCase();
             if (f === "md" || f === "txt") format = f;
-        } else if (a === "--format") {
+            continue;
+        }
+        if (a === "--format") {
             const f = (argv[i + 1] || "").trim().toLowerCase();
             if (f === "md" || f === "txt") format = f;
             i++;
+            continue;
         }
+
+        if (a === "--md") { format = "md"; continue; }
+        if (a === "--txt") { format = "txt"; continue; }
     }
+
     base = path.basename(base); // prevent accidental paths
-    // If user supplied an extension, infer format from it unless --format was given
+
+    // If user supplied an extension, infer format from it (unless explicit flag already set)
     const extMatch = base.match(/\.([a-z0-9]+)$/i);
     if (extMatch) {
         const ext = extMatch[1].toLowerCase();
-        if (ext === "md" || ext === "markdown") format = format || "txt";
-        else if (ext === "txt") format = format || "txt";
+        if ((ext === "md" || ext === "markdown") && (format !== "md" && format !== "txt")) {
+            format = "md";
+        } else if (ext === "txt" && (format !== "md" && format !== "txt")) {
+            format = "txt";
+        }
+        // if other extension, keep chosen format
     } else {
         // No extension: append by chosen/derived format
         base = `${base}.${format === "md" ? "md" : "txt"}`;
     }
+
     return { baseName: base, format };
 }
+
 
 function detectLanguageForFile(file, content) {
     const base = path.basename(file);
