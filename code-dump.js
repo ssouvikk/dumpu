@@ -150,8 +150,8 @@ function getOutputConfig(argv) {
     //   --fileName=mydump
     //   --fileName mydump.md
     //   --format=md|txt (overrides extension inference)
-    let base = "completeCodebase.md"; // default name + default format .md
-    let format = "md"; // "md" | "txt"
+    let base = "completeCodebase.txt"; // default name + default format .md
+    let format = "txt"; // "md" | "txt"
     for (let i = 2; i < argv.length; i++) {
         const a = argv[i];
         if (a.startsWith("--fileName=")) {
@@ -173,11 +173,11 @@ function getOutputConfig(argv) {
     const extMatch = base.match(/\.([a-z0-9]+)$/i);
     if (extMatch) {
         const ext = extMatch[1].toLowerCase();
-        if (ext === "md" || ext === "markdown") format = format || "md";
+        if (ext === "md" || ext === "markdown") format = format || "txt";
         else if (ext === "txt") format = format || "txt";
     } else {
         // No extension: append by chosen/derived format
-        base = `${base}.${format === "txt" ? "txt" : "md"}`;
+        base = `${base}.${format === "md" ? "md" : "txt"}`;
     }
     return { baseName: base, format };
 }
