@@ -1,6 +1,6 @@
 {
   "name": "dumpu",
-  "version": "0.3.2",
+  "version": "0.4.0",
   "description": "CLI tool to dump git-tracked codebase into a single .md or .txt file with syntax highlighting",
   "bin": {
     "dumpu": "./code-dump.js"
