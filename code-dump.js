@@ -503,32 +503,26 @@ function writeSkippedSection(ws, skippedList, format) {
     });
 
     if (format === "md") {
-        ws.write(`\n## Skipped Files (excluded by rules)\n`);
+        ws.write(`\n## Skipped Files (total : ${sorted.length})\n`);
         if (sorted.length === 0) {
-            ws.write(`\n_No files were excluded by the rules._\n`);
+            ws.write(`\n_No files were excluded._\n`);
             return;
         }
-        ws.write(`\n> Total skipped: ${sorted.length}\n\n`);
-        ws.write(`| File | Reason | Size (KB) |\n`);
-        ws.write(`|---|---|---:|\n`);
         for (const s of sorted) {
-            const kb = typeof s.size === "number" ? (s.size / 1024).toFixed(1) : "-";
             // escape vertical bars in file path for markdown tables
             const safeFile = s.file.replace(/\|/g, "\\|");
-            const safeReason = (s.reason || "").replace(/\|/g, "\\|");
-            ws.write(`| \`${safeFile}\` | ${safeReason} | ${kb} |\n`);
+            ws.write(`\`${safeFile}\` \n`);
         }
     } else {
-        ws.write(`\nSKIPPED FILES (excluded by rules)\n`);
+        ws.write(`\nSKIPPED FILES (total : ${sorted.length})\n`);
         ws.write(`---------------------------------\n`);
         if (sorted.length === 0) {
-            ws.write(`(No files were excluded by the rules)\n`);
+            ws.write(`(No files were excluded)\n`);
             return;
         }
-        ws.write(`Total skipped: ${sorted.length}\n`);
         for (const s of sorted) {
             const kb = typeof s.size === "number" ? `${(s.size / 1024).toFixed(1)}KB` : "-";
-            ws.write(` - ${s.file}  -> ${s.reason}  [size: ${kb}]\n`);
+            ws.write(` - ${s.file}\n`);
         }
         ws.write(`\n`);
     }
