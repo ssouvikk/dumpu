@@ -72,6 +72,9 @@ const DISALLOWED_FILES_STR = "package-lock.json/yarn.lock/pnpm-lock.yaml";
 // Max file size (in KB). Only files <= this size are included.
 let MAX_FILE_SIZE_KB = 200;
 
+// Whether to include skipped/excluded files list in the generated output
+let INCLUDE_SKIPPED_IN_OUTPUT = true;
+
 // Optional CLI override: --maxKB=250 or --maxKB 250
 for (let i = 2; i < process.argv.length; i++) {
     const a = process.argv[i];
@@ -82,6 +85,13 @@ for (let i = 2; i < process.argv.length; i++) {
         const v = Number(process.argv[i + 1]);
         if (!Number.isNaN(v) && v > 0) MAX_FILE_SIZE_KB = v;
         i++;
+    }
+    else if (a === "--noSkipped") {
+        // Don't write the skipped/excluded files section into the output file
+        INCLUDE_SKIPPED_IN_OUTPUT = false;
+    } else if (a === "--includeSkipped") {
+        // Explicit opt-in (default true anyway)
+        INCLUDE_SKIPPED_IN_OUTPUT = true;
     }
 }
 const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_KB * 1024;
@@ -481,6 +491,52 @@ fs.mkdirSync(path.dirname(OUTFILE), { recursive: true });
 
 /**
  * ===============================
+ * (E0) Write skipped list section
+ * ===============================
+ */
+function writeSkippedSection(ws, skippedList, format) {
+    if (!INCLUDE_SKIPPED_IN_OUTPUT) return;
+    const sorted = [...skippedList].sort((a, b) => {
+        // stable sort by reason then file
+        const r = (a.reason || "").localeCompare(b.reason || "", "en");
+        return r !== 0 ? r : a.file.localeCompare(b.file, "en");
+    });
+
+    if (format === "md") {
+        ws.write(`\n## Skipped Files (excluded by rules)\n`);
+        if (sorted.length === 0) {
+            ws.write(`\n_No files were excluded by the rules._\n`);
+            return;
+        }
+        ws.write(`\n> Total skipped: ${sorted.length}\n\n`);
+        ws.write(`| File | Reason | Size (KB) |\n`);
+        ws.write(`|---|---|---:|\n`);
+        for (const s of sorted) {
+            const kb = typeof s.size === "number" ? (s.size / 1024).toFixed(1) : "-";
+            // escape vertical bars in file path for markdown tables
+            const safeFile = s.file.replace(/\|/g, "\\|");
+            const safeReason = (s.reason || "").replace(/\|/g, "\\|");
+            ws.write(`| \`${safeFile}\` | ${safeReason} | ${kb} |\n`);
+        }
+    } else {
+        ws.write(`\nSKIPPED FILES (excluded by rules)\n`);
+        ws.write(`---------------------------------\n`);
+        if (sorted.length === 0) {
+            ws.write(`(No files were excluded by the rules)\n`);
+            return;
+        }
+        ws.write(`Total skipped: ${sorted.length}\n`);
+        for (const s of sorted) {
+            const kb = typeof s.size === "number" ? `${(s.size / 1024).toFixed(1)}KB` : "-";
+            ws.write(` - ${s.file}  -> ${s.reason}  [size: ${kb}]\n`);
+        }
+        ws.write(`\n`);
+    }
+}
+
+
+/**
+ * ===============================
  * (E) Instruction block
  * ===============================
  */
@@ -541,6 +597,10 @@ if (OUTPUT_FORMAT === "md") {
     for (const file of sortedFiles) {
         ws.write(`- \`${file}\`\n`);
     }
+    
+    // Write skipped/excluded summary just after the TOC
+    writeSkippedSection(ws, skipped, "md");
+    
     ws.write(`\n---\n`);
     ws.write(`\n## Files\n`);
 } else {
@@ -551,6 +611,11 @@ if (OUTPUT_FORMAT === "md") {
         ws.write(file + "\n");
     }
     ws.write("\n\n=================================\n\n");
+
+    // Write skipped/excluded summary just after the TOC
+    writeSkippedSection(ws, skipped, "txt");
+    ws.write("\n=================================\n\n");
+
 }
 
 for (const file of sortedFiles) {
@@ -597,7 +662,6 @@ const totalSecs = nowSec() - startTime;
 console.log(`\nDone! Output saved to ${OUTFILE}`);
 console.log(`Total time:  ${formatTime(totalSecs)}`);
 console.log(
-    `Config -> AllowedExt: ${[...allowedExt].join("/") || "(none)"} | DisallowedExt: ${[...disallowedExt].join("/") || "(none)"} | DisallowedFiles: ${
-        [...disallowedFiles].join("/") || "(none)"
+    `Config -> AllowedExt: ${[...allowedExt].join("/") || "(none)"} | DisallowedExt: ${[...disallowedExt].join("/") || "(none)"} | DisallowedFiles: ${[...disallowedFiles].join("/") || "(none)"
     } | AllowedFiles: ${[...allowedFiles].join("/") || "(none)"} | MaxKB: ${MAX_FILE_SIZE_KB}`
 );
